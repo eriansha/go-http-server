@@ -63,12 +63,19 @@ func handleConnection(conn net.Conn) {
 
 	log.Printf("Request to %s: %s", method, path)
 
-	// Add CRLF that can be used to mark the end of the status line.
-	// source: https://developer.mozilla.org/en-US/docs/Glossary/CRLF
-	// HTTP Specification Compliance: The HTTP/1.1 specification (RFC 7230) requires the use of CRLF for line endings.
-	response := "HTTP/1.1 200 OK\r\n"
-	response += "Content-Type: text/plain\r\n"
-	response += "\r\n"
+	var response string = ""
+
+	if path == "/" {
+		// Add CRLF that can be used to mark the end of the status line.\
+		// source: https://developer.mozilla.org/en-US/docs/Glossary/CRLF
+		// HTTP Specification Compliance: The HTTP/1.1 specification (RFC 7230) requires the use of CRLF for line endings.
+		response += "HTTP/1.1 200 OK\r\n"
+		response += "Content-Type: text/plain\r\n"
+		response += "\r\n"
+	} else {
+		response += "HTTP/1.1 400 Not Found\r\n"
+		response += "\r\n"
+	}
 
 	conn.Write([]byte(response))
 }
