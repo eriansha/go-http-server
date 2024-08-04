@@ -30,9 +30,16 @@ func main() {
 			continue
 		}
 
-		// Add CRLF that can be used to mark the end of the status line
-		// source: https://developer.mozilla.org/en-US/docs/Glossary/CRLF
-		response := "HTTP/1.1 200 OK\r\n\r\n"
-		conn.Write([]byte(response))
+		handleConnection(conn)
 	}
+}
+
+func handleConnection(conn net.Conn) {
+	// ensure we close the connection after we're done
+	defer conn.Close()
+
+	// Add CRLF that can be used to mark the end of the status line
+	// source: https://developer.mozilla.org/en-US/docs/Glossary/CRLF
+	response := "HTTP/1.1 200 OK\r\n\r\n"
+	conn.Write([]byte(response))
 }
