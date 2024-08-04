@@ -88,10 +88,14 @@ func handleConnection(conn net.Conn) {
 	// Add CRLF that can be used to mark the end of the status line.
 	// source: https://developer.mozilla.org/en-US/docs/Glossary/CRLF
 	// HTTP Specification Compliance: The HTTP/1.1 specification (RFC 7230) requires the use of CRLF for line endings.
+
+	// Header
 	response += fmt.Sprintf("HTTP/1.1 %d %s\r\n", statusCode, status)
 	response += "Content-Type: text/plain\r\n"
 	response += "\r\n"
+	// Body
 	response += body
+	response += "\r\n"
 
 	conn.Write([]byte(response))
 }
