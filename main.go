@@ -16,6 +16,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	// ensure we teardown the server when the program exits
+	defer listener.Close()
+
 	log.Println("Server is listening on port :8080")
 
 	// Accept and handle connection
