@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -38,8 +39,36 @@ func handleConnection(conn net.Conn) {
 	// ensure we close the connection after we're done
 	defer conn.Close()
 
-	// Add CRLF that can be used to mark the end of the status line
+	/*
+		Read from request
+		we're create buffer with length of 1024 bytes because it's common pratice, but it's not fixed rule.
+		reasons:
+		- Typical size for small request: 1024 bytes (1 KB) is offten sufficient to capture the headers of a typical HTTP request
+		- Efficiency in memory allocation: In many systems, allocating memory in powers of 2 (like 1024) can be more efficient due to how memory allocation is often implemented
+
+		however, it's not fixed rule and might not be optimal if the request was too small (wasted memory)
+	*/
+	buffer := make([]byte, 1024)
+	_, err := conn.Read(buffer)
+	if err != nil {
+		log.Fatalln("Error reading request:", err)
+		os.Exit(1)
+	}
+
+	// Parse the request to get request context (e.g HTTP method, request path, etc)
+	request := string(buffer)
+	requestLine := strings.Split(strings.Split(request, "\n")[0], " ")
+	method := requestLine[0]
+	path := requestLine[1]
+
+	log.Printf("Request to %s: %s", method, path)
+
+	// Add CRLF that can be used to mark the end of the status line.
 	// source: https://developer.mozilla.org/en-US/docs/Glossary/CRLF
-	response := "HTTP/1.1 200 OK\r\n\r\n"
+	// HTTP Specification Compliance: The HTTP/1.1 specification (RFC 7230) requires the use of CRLF for line endings.
+	response := "HTTP/1.1 200 OK\r\n"
+	response += "Content-Type: text/plain\r\n"
+	response += "\r\n"
+
 	conn.Write([]byte(response))
 }
