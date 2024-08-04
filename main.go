@@ -76,6 +76,8 @@ func handleConnection(conn net.Conn) {
 	// Route the request from given method and path
 	body, statusCode := router(method, path)
 
+	log.Printf("Request %s %s return HTTP status code %d", method, path, statusCode)
+
 	var status string
 	if statusCode == 200 {
 		status = "OK"
