@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -35,6 +36,17 @@ func main() {
 	}
 }
 
+func router(method, path string) (string, int) {
+	switch path {
+	case "/":
+		return fmt.Sprintf("Access main page. %s to /", method), 200
+	case "/user":
+		return fmt.Sprintf("Access user page. %s to /users", method), 200
+	default:
+		return "404 Not Found", 404
+	}
+}
+
 func handleConnection(conn net.Conn) {
 	// ensure we close the connection after we're done
 	defer conn.Close()
@@ -61,21 +73,25 @@ func handleConnection(conn net.Conn) {
 	method := requestLine[0]
 	path := requestLine[1]
 
-	log.Printf("Request to %s: %s", method, path)
+	// Route the request from given method and path
+	body, statusCode := router(method, path)
+
+	var status string
+	if statusCode == 200 {
+		status = "OK"
+	} else {
+		status = "Not Found"
+	}
 
 	var response string = ""
 
-	if path == "/" {
-		// Add CRLF that can be used to mark the end of the status line.\
-		// source: https://developer.mozilla.org/en-US/docs/Glossary/CRLF
-		// HTTP Specification Compliance: The HTTP/1.1 specification (RFC 7230) requires the use of CRLF for line endings.
-		response += "HTTP/1.1 200 OK\r\n"
-		response += "Content-Type: text/plain\r\n"
-		response += "\r\n"
-	} else {
-		response += "HTTP/1.1 400 Not Found\r\n"
-		response += "\r\n"
-	}
+	// Add CRLF that can be used to mark the end of the status line.
+	// source: https://developer.mozilla.org/en-US/docs/Glossary/CRLF
+	// HTTP Specification Compliance: The HTTP/1.1 specification (RFC 7230) requires the use of CRLF for line endings.
+	response += fmt.Sprintf("HTTP/1.1 %d %s\r\n", statusCode, status)
+	response += "Content-Type: text/plain\r\n"
+	response += "\r\n"
+	response += body
 
 	conn.Write([]byte(response))
 }
